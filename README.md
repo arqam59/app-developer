@@ -1,1 +1,538 @@
-# app-developer  i create to study for developers
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS ELITE | ULTIMATE PRODUCTION</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root { 
+            --bg: #030303; 
+            --accent: #4f46e5; 
+            --accent-glow: rgba(79, 70, 229, 0.4);
+            --glass: rgba(255,255,255,0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, var(--bg) 0%, #0a0a0a 100%); 
+            color: white; 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden; 
+            cursor: none; 
+            position: relative;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* FLOATING PARTICLES */
+        .particles {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #4f46e5, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.1), transparent),
+                radial-gradient(1px 1px at 90px 40px, #4f46e5, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.2), transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: float 20s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        /* LOADER */
+        #loader { 
+            position: fixed; inset: 0; background: #000; z-index: 10000; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .load-bar-wrap { width: 200px; height: 1px; background: rgba(255,255,255,0.1); margin-top: 20px; }
+        #load-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent), #7c3aed); }
+
+        /* CURSOR */
+        #cursor { 
+            position: fixed; top: 0; left: 0; width: 8px; height: 8px; 
+            background: radial-gradient(circle, white, transparent); border-radius: 50%; 
+            pointer-events: none !important; z-index: 9999; mix-blend-mode: difference; 
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        #cursor-follower { 
+            position: fixed; top: 0; left: 0; width: 40px; height: 40px; 
+            border: 1px solid var(--accent-glow); border-radius: 50%; 
+            pointer-events: none !important; z-index: 9998;
+        }
+
+        /* NOISE */
+        .noise-filter {
+            position: fixed; inset: 0; z-index: 9997; pointer-events: none; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* GLASS */
+        .glass {
+            background: var(--glass); backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass:hover {
+            border-color: var(--accent-glow); box-shadow: 0 25px 60px -12px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.2);
+            transform: translateY(-8px);
+        }
+
+        /* TECH BUTTONS - NEW! */
+        .tech-pill {
+            display: inline-flex; align-items: center; justify-content: center; height: 42px; padding: 0 24px;
+            border-radius: 9999px; border: 2px solid var(--accent-glow); color: #a5b4fc; font-size: 0.75rem;
+            letter-spacing: 0.15em; background: rgba(79,70,229,0.08); text-transform: uppercase; margin: 0 12px 12px 0;
+            transition: all 0.3s ease; backdrop-filter: blur(10px); cursor: pointer; pointer-events: auto !important;
+            position: relative; overflow: hidden;
+        }
+        .tech-pill:hover { 
+            background: var(--accent-glow); color: white; transform: translateY(-2px) scale(1.05); 
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+        .tech-pill:active { transform: translateY(0) scale(0.98); }
+
+        /* SPLIT SCREEN */
+        .split-section { display: flex; height: 100vh; width: 100%; overflow: hidden; position: relative; }
+        .left-side { width: 45%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 8%; position: sticky; top: 0; }
+        .right-side { width: 55%; overflow-y: visible; }
+        .project-img { height: 100vh; width: 100%; object-fit: cover; filter: grayscale(100%) contrast(1.1); transition: all 1s cubic-bezier(0.23, 1, 0.32, 1); }
+        .project-img.active { filter: grayscale(0%) contrast(1) brightness(1.05); transform: scale(1.02); }
+
+        /* MAGNETIC BUTTON */
+        .magnetic-wrap { position: relative; width: 400px; height: 400px; display: flex; align-items: center; justify-content: center; }
+        .talk-btn {
+            width: 220px; height: 220px; background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto !important; z-index: 10; position: relative;
+        }
+        .talk-btn::before {
+            content: ''; position: absolute; inset: 2px; border-radius: 50%;
+            background: linear-gradient(45deg, var(--accent), #7c3aed); opacity: 0; transition: opacity 0.3s;
+        }
+        .talk-btn:hover { box-shadow: 0 30px 60px rgba(79,70,229,0.4), 0 0 60px var(--accent-glow); transform: scale(1.08) rotate(5deg); }
+        .talk-btn:hover::before { opacity: 1; }
+
+        /* TECH EXPLANATION MODAL */
+        #tech-modal { 
+            position: fixed; inset: 0; z-index: 1001; 
+            background: rgba(3,3,3,0.98); backdrop-filter: blur(40px); 
+            display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; 
+        }
+        .tech-modal-content {
+            background: rgba(15,15,15,0.95); backdrop-filter: blur(50px); 
+            border: 2px solid rgba(79,70,229,0.5); border-radius: 36px; 
+            width: 90%; max-width: 800px; max-height: 80vh; overflow-y: auto; padding: 4rem;
+            opacity: 0; transform: scale(0.8) rotateX(15deg); box-shadow: 0 50px 120px rgba(0,0,0,0.7);
+        }
+        .tech-title { font-size: 3rem; font-weight: 900; background: linear-gradient(45deg, var(--accent), #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1.5rem; }
+        .tech-desc { font-size: 1.2rem; line-height: 1.8; color: rgba(255,255,255,0.9); margin-bottom: 2rem; }
+
+        /* COMMENT MODAL */
+        #comment-modal { position: fixed; inset: 0; z-index: 1000; background: rgba(3,3,3,0.95); backdrop-filter: blur(30px) saturate(150%); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; }
+        .comment-container {
+            background: rgba(15,15,15,0.9); backdrop-filter: blur(40px); border: 1px solid rgba(79,70,229,0.3);
+            border-radius: 32px; width: 90%; max-width: 680px; max-height: 85vh; overflow-y: auto;
+            opacity: 0; transform: scale(0.7) rotateX(10deg); padding: 3rem; box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+        }
+        .comment-input { width: 100%; background: rgba(20,20,20,0.8); border: 2px solid rgba(79,70,229,0.3); border-radius: 20px; padding: 1.5rem 2rem; color: white; font-size: 1.1rem; resize: vertical; min-height: 140px; font-family: inherit; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .comment-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 30px var(--accent-glow); transform: translateY(-2px); }
+        .comment-buttons { display: flex; gap: 1.5rem; justify-content: flex-end; margin-top: 2rem; }
+        .btn-primary, .btn-secondary { padding: 1rem 2.5rem; border-radius: 20px; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; font-family: inherit; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-transform: uppercase; letter-spacing: 1px; }
+        .btn-primary { background: linear-gradient(45deg, var(--accent), #7c3aed); color: white; box-shadow: 0 10px 30px var(--accent-glow); }
+        .btn-primary:hover { transform: translateY(-4px) scale(1.05); box-shadow: 0 20px 40px var(--accent-glow); }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: white; border: 2px solid rgba(255,255,255,0.2); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+
+        /* COMMENTS */
+        .comments-list { margin-top: 2rem; }
+        .comment-item { background: rgba(255,255,255,0.03); border-radius: 20px; padding: 2rem; margin-bottom: 1.5rem; border-left: 4px solid var(--accent); position: relative; overflow: hidden; }
+        .comment-item::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+        .comment-author { font-weight: 900; color: var(--accent); font-size: 1rem; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .comment-text { line-height: 1.7; color: rgba(255,255,255,0.92); font-size: 1.05rem; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .split-section { flex-direction: column; }
+            .left-side, .right-side { width: 100%; }
+            .magnetic-wrap { width: 300px; height: 300px; }
+            .talk-btn { width: 160px; height: 160px; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="particles"></div>
+    <div class="noise-filter"></div>
+
+    <!-- LOADER -->
+    <div id="loader">
+        <div class="mono text-[9px] tracking-[0.6em] text-indigo-500 mb-2 uppercase">System_Override_Active</div>
+        <div id="load-percent" class="text-5xl font-black italic tracking-widest">00%</div>
+        <div class="load-bar-wrap"><div id="load-bar"></div></div>
+    </div>
+
+    <!-- CURSOR -->
+    <div id="cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content" style="opacity: 0;">
+        
+        <!-- HERO -->
+        <section class="h-screen flex flex-col items-center justify-center text-center px-8 relative" id="hero">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black"></div>
+            <h1 id="hero-t" class="text-[16vw] md:text-[14vw] font-black tracking-[-0.05em] leading-none translate-y-32 drop-shadow-2xl">
+                NEXUS<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">_</span>ELITE
+            </h1>
+            <p id="hero-s" class="mono text-gray-400 mt-8 tracking-[0.4em] text-[11px] uppercase opacity-0">// Silicon Valley Standards // 2026 // AI-Powered Development //</p>
+        </section>
+
+        <!-- PROJECT CARDS -->
+        <section class="py-32 px-8 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12" id="projects">
+            <div data-modal="app" class="glass p-20 rounded-[4rem] h-[28rem] flex flex-col justify-between group cursor-pointer pointer-events-auto relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <h3 class="text-6xl md:text-7xl font-black italic tracking-tighter leading-none relative z-10">HIGH_PERF<br>MOBILE</h3>
+                <div class="mono text-indigo-400 text-[11px] tracking-[0.1em] uppercase relative z-10">[ DEPLOY_NODE ]</div>
+            </div>
+            <div data-modal="web3" class="glass p-20 rounded-[4rem] h-[28rem] flex flex-col justify-between group cursor-pointer pointer-events-auto relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <h3 class="text-6xl md:text-7xl font-black italic tracking-tighter leading-none relative z-10">BLOCKCHAIN<br>LOGISTICS</h3>
+                <div class="mono text-indigo-400 text-[11px] tracking-[0.1em] uppercase relative z-10">[ SYNC_LEDGER ]</div>
+            </div>
+        </section>
+
+        <!-- SPLIT SCREEN PORTFOLIO -->
+        <section class="split-section bg-white/90 text-black relative" id="portfolio">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5"></div>
+            <div class="left-side relative z-10">
+                <div class="mono text-[11px] text-gray-600 mb-8 uppercase tracking-[0.5em]">// Clinical_Practice</div>
+                <div id="project-info">
+                    <h2 class="text-9xl md:text-[10rem] font-black tracking-[-0.03em] mb-8 uppercase leading-[0.75]" id="p-title">Aesthetix</h2>
+                    <p class="text-2xl text-gray-600 max-w-sm mb-12 leading-relaxed tracking-wide" id="p-desc">Deep-learning UI for automated design systems and cognitive workflows.</p>
+                </div>
+            </div>
+            <div class="right-side" id="img-container">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" class="project-img active" alt="P1">
+                <img src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2670&auto=format&fit=crop" class="project-img" alt="P2">
+                <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2664&auto=format&fit=crop" class="project-img" alt="P3">
+            </div>
+        </section>
+
+        <!-- CONTACT -->
+        <section class="h-screen flex flex-col items-center justify-center relative bg-black overflow-hidden" id="contact">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--accent)_0%,_transparent_70%)] opacity-8"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/80"></div>
+            <div class="mono text-indigo-400 mb-16 tracking-[0.6em] text-[11px] uppercase opacity-70 relative z-10">Ready to initiate protocol?</div>
+            <div class="magnetic-wrap relative z-10">
+                <button class="talk-btn magnetic-target pointer-events-auto" id="open-comment-modal">Let's Talk</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- PROJECT MODAL -->
+    <div id="modal-overlay" class="fixed inset-0 z-[500] hidden flex items-center justify-center p-6">
+        <div id="m-bg" class="absolute inset-0 bg-black/98 backdrop-blur-3xl opacity-0"></div>
+        <div id="m-content" class="relative w-full max-w-5xl glass rounded-[5rem] p-20 md:p-24 opacity-0 scale-95 max-h-[90vh] overflow-y-auto">
+            <button id="m-close" class="absolute top-16 right-16 mono text-[11px] tracking-[0.1em] text-gray-400 hover:text-white uppercase pointer-events-auto transition-all duration-300 hover:scale-110">[ terminate_session ]</button>
+            <div id="m-data"></div>
+        </div>
+    </div>
+
+    <!-- NEW TECH EXPLANATION MODAL -->
+    <div id="tech-modal">
+        <div class="tech-modal-content">
+            <button id="tech-close" class="absolute top-8 right-8 text-2xl mono text-gray-400 hover:text-white transition-all duration-300 hover:scale-110">[ close ]</button>
+            <div id="tech-content">
+                <h2 class="tech-title" id="tech-title">SwiftUI</h2>
+                <p class="tech-desc" id="tech-desc">Apple's declarative UI framework for building native iOS, macOS, watchOS, and tvOS apps with modern Swift syntax.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMMENT MODAL -->
+    <div id="comment-modal">
+        <div class="comment-container">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center">
+                    <span class="mono text-sm font-bold text-white">AI</span>
+                </div>
+                <div class="mono text-[12px] tracking-[0.5em] text-indigo-400 uppercase">FEEDBACK TERMINAL v2.0</div>
+            </div>
+            <div class="comments-list" id="comments-list">
+                <div class="comment-item">
+                    <div class="comment-author">Nexus_User_01</div>
+                    <div class="comment-text">Incredible work. The split-screen portfolio is next-level smooth. GSAP animations are buttery.</div>
+                </div>
+            </div>
+            <textarea id="comment-input" class="comment-input" placeholder="Deploy your feedback... (Ctrl+Enter to transmit)"></textarea>
+            <div class="flex gap-4 items-center text-sm text-indigo-400 mb-4">
+                <span>📧 hafeezafi@gmail.com + emergencyemergency502@gmail.com</span>
+            </div>
+            <div class="comment-buttons">
+                <button class="btn-secondary" id="cancel-comment">Abort</button>
+                <button class="btn-primary" id="submit-comment">Transmit Feedback → Email</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // TECH EXPLANATIONS DATABASE
+        const techExplanations = {
+            'SwiftUI': 'Apple\'s declarative UI framework for building native iOS, macOS, watchOS, and tvOS apps. Uses modern Swift syntax with live previews and automatic layout.',
+            'Rust': 'Systems programming language focused on safety, speed, and concurrency. Memory safety without garbage collection. Used for high-performance mobile backends.',
+            'Metal': 'Apple\'s low-level GPU API for iOS/macOS. Direct access to GPU for 120fps graphics, compute shaders, and machine learning acceleration.',
+            'ARKit': 'Apple\'s augmented reality platform. Real-time 3D scene understanding, face tracking, and spatial computing for immersive mobile experiences.',
+            'Solidity': 'Primary smart contract language for Ethereum blockchain. Turing-complete with gas-optimized execution for DeFi protocols and NFT marketplaces.',
+            'Go': 'Google\'s compiled language for scalable backend systems. Excellent concurrency model with goroutines. Perfect for blockchain nodes and API services.',
+            'ZK-SNARKs': 'Zero-Knowledge Succinct Non-Interactive Arguments of Knowledge. Privacy-preserving proofs enabling confidential transactions and scalable rollups.',
+            'IPFS': 'InterPlanetary File System. Decentralized storage protocol for Web3. Content-addressed storage with permanent, distributed file hosting.'
+        };
+
+        // LOADER
+        let lp = 0;
+        const loaderInt = setInterval(() => {
+            lp += Math.floor(Math.random() * 15) + 2;
+            if(lp >= 100) { lp = 100; clearInterval(loaderInt); revealWithGlitch(); }
+            document.getElementById('load-percent').innerText = lp.toString().padStart(2, '0') + '%';
+            document.getElementById('load-bar').style.width = lp + '%';
+        }, 80);
+
+        function revealWithGlitch() {
+            const tl = gsap.timeline();
+            tl.to("#loader", { yPercent: -120, duration: 1.4, ease: "expo.inOut" })
+              .to("#main-content", { opacity: 1, duration: 1 }, "-=0.8")
+              .to("#hero-t", { y: 0, duration: 2.2, ease: "expo.out" }, "-=1.8")
+              .to("#hero-s", { opacity: 1, y: 0, duration: 1.5 }, "-=1.5");
+        }
+
+        // CURSOR
+        const c = document.getElementById('cursor');
+        const cf = document.getElementById('cursor-follower');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(c, { x: e.clientX, y: e.clientY, duration: 0.12 });
+            gsap.to(cf, { x: e.clientX - 20, y: e.clientY - 20, duration: 0.3, ease: "power2.out" });
+        });
+
+        // INTERACTIVE ELEMENTS
+        document.querySelectorAll('button, [data-modal], .talk-btn, .tech-pill').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                gsap.to(cf, { scale: 3.5, background: "rgba(79,70,229,0.2)", borderColor: "var(--accent)", duration: 0.4 });
+                gsap.to(c, { scale: 2, duration: 0.3 });
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cf, { scale: 1, background: "transparent", borderColor: "rgba(255,255,255,0.3)", duration: 0.4 });
+                gsap.to(c, { scale: 1, duration: 0.3 });
+            });
+        });
+
+        // NEW TECH BUTTON CLICK HANDLERS
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tech-pill')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const techName = e.target.textContent.trim();
+                if (techExplanations[techName]) {
+                    document.getElementById('tech-title').textContent = techName;
+                    document.getElementById('tech-desc').textContent = techExplanations[techName];
+                    showTechModal();
+                }
+            }
+        });
+
+        // TECH MODAL FUNCTIONS
+        function showTechModal() {
+            const techModal = document.getElementById('tech-modal');
+            techModal.style.opacity = '1';
+            techModal.style.visibility = 'visible';
+            gsap.to('.tech-modal-content', { opacity: 1, scale: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" });
+        }
+
+        document.getElementById('tech-close').addEventListener('click', () => {
+            gsap.to('.tech-modal-content', { opacity: 0, scale: 0.8, rotateX: 15, duration: 0.4, ease: "power2.in", 
+                onComplete: () => {
+                    document.getElementById('tech-modal').style.opacity = '0';
+                    document.getElementById('tech-modal').style.visibility = 'hidden';
+                }
+            });
+        });
+
+        document.getElementById('tech-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'tech-modal') {
+                gsap.to('.tech-modal-content', { opacity: 0, scale: 0.8, rotateX: 15, duration: 0.4, ease: "power2.in", 
+                    onComplete: () => {
+                        document.getElementById('tech-modal').style.opacity = '0';
+                        document.getElementById('tech-modal').style.visibility = 'hidden';
+                    }
+                });
+            }
+        });
+
+        // COMMENT SYSTEM (UNCHANGED - WORKING)
+        const commentModal = document.getElementById('comment-modal');
+        const openCommentBtn = document.getElementById('open-comment-modal');
+        const closeCommentBtn = document.getElementById('cancel-comment');
+        const submitCommentBtn = document.getElementById('submit-comment');
+        const commentInput = document.getElementById('comment-input');
+        const commentsList = document.getElementById('comments-list');
+
+        const EMAIL1 = 'hafeezafi@gmail.com';
+        const EMAIL2 = 'emergencyemergency502@gmail.com';
+
+        openCommentBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            commentModal.style.opacity = '1';
+            commentModal.style.visibility = 'visible';
+            gsap.to('.comment-container', { opacity: 1, scale: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" });
+            commentInput.focus();
+        });
+
+        function closeCommentModal() {
+            gsap.to('.comment-container', { opacity: 0, scale: 0.7, rotateX: 10, duration: 0.4, ease: "power2.in", 
+                onComplete: () => { commentModal.style.opacity = '0'; commentModal.style.visibility = 'hidden'; }
+            });
+        }
+
+        closeCommentBtn.addEventListener('click', closeCommentModal);
+        commentModal.addEventListener('click', (e) => {
+            if (e.target === commentModal) closeCommentModal();
+        });
+
+        submitCommentBtn.addEventListener('click', () => {
+            const text = commentInput.value.trim();
+            if (text && text.length <= 500) {
+                const timestamp = new Date().toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const subject = `NEXUS ELITE | Feedback [${timestamp}]`;
+                const body = `🌐 NEXUS ELITE Feedback Terminal\n\n💬 Message:\n${text}\n\n📅 ${timestamp}\n\n---\nSent from nexuselite.dev`;
+                const mailtoLink = `mailto:${EMAIL1}?cc=${EMAIL2}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                
+                const comment = {
+                    id: Date.now(),
+                    author: `NEXUS_${Math.floor(Math.random()*9999).toString().padStart(4, '0')}`,
+                    text: text,
+                    time: timestamp
+                };
+                
+                let comments = JSON.parse(localStorage.getItem('nexus_comments') || '[]');
+                comments.unshift(comment);
+                localStorage.setItem('nexus_comments', JSON.stringify(comments.slice(0, 50)));
+
+                const commentEl = document.createElement('div');
+                commentEl.className = 'comment-item';
+                commentEl.innerHTML = `<div class="comment-author">${comment.author}</div><div class="comment-text">${comment.text}</div>`;
+                commentsList.insertBefore(commentEl, commentsList.firstChild);
+                
+                gsap.fromTo(commentEl, { opacity: 0, scale: 0.8, y: 50 }, { opacity: 1, scale: 1, y: 0, duration: 0.8, ease: "back.out(1.7)" });
+
+                commentInput.value = '';
+                window.location.href = mailtoLink;
+            }
+        });
+
+        commentInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) submitCommentBtn.click();
+        });
+
+        function loadComments() {
+            const comments = JSON.parse(localStorage.getItem('nexus_comments') || '[]');
+            comments.slice(0, 5).forEach(comment => {
+                const commentEl = document.createElement('div');
+                commentEl.className = 'comment-item';
+                commentEl.innerHTML = `<div class="comment-author">${comment.author}</div><div class="comment-text">${comment.text}</div>`;
+                commentsList.appendChild(commentEl);
+            });
+        }
+        loadComments();
+
+        // PORTFOLIO, MAGNETIC, PROJECT MODALS (unchanged from previous)
+        const projectData = [
+            { title: "Aesthetix", desc: "Deep-learning UI for automated design systems and cognitive workflows." },
+            { title: "Vault_01", desc: "End-to-end biometric security layers for decentralized finance." },
+            { title: "Nexus_OS", desc: "A spatial operating system for the next generation of the web." }
+        ];
+
+        gsap.utils.toArray(".project-img").forEach((img, i) => {
+            ScrollTrigger.create({
+                trigger: img, start: "top center", end: "bottom center",
+                onEnter: () => { updateText(i); img.classList.add('active'); },
+                onEnterBack: () => { updateText(i); img.classList.add('active'); },
+                onLeave: () => img.classList.remove('active'),
+                onLeaveBack: () => img.classList.remove('active')
+            });
+        });
+
+        function updateText(i) {
+            gsap.to("#project-info", { opacity: 0, x: -40, duration: 0.4, ease: "power2.in", 
+                onComplete: () => {
+                    document.getElementById('p-title').innerText = projectData[i].title;
+                    document.getElementById('p-desc').innerText = projectData[i].desc;
+                    gsap.to("#project-info", { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" });
+                }
+            });
+        }
+
+        const mWrap = document.querySelector('.magnetic-wrap');
+        const mTarget = document.querySelector('.magnetic-target');
+        mWrap.addEventListener('mousemove', (e) => {
+            const r = mWrap.getBoundingClientRect();
+            const x = e.clientX - r.left - r.width/2;
+            const y = e.clientY - r.top - r.height/2;
+            gsap.to(mTarget, { x: x * 0.4, y: y * 0.4, duration: 0.6, ease: "power3.out" });
+        });
+        mWrap.addEventListener('mouseleave', () => {
+            gsap.to(mTarget, { x: 0, y: 0, duration: 1, ease: "elastic.out(1, 0.4)" });
+        });
+
+        const modalContent = {
+            app: { title: "APP_ENGINEERING", body: "120fps fluid motion + low-latency system architectures.", tech: ["SwiftUI", "Rust", "Metal", "ARKit"] },
+            web3: { title: "WEB3_LOGISTICS", body: "Machine economy rails with zero-knowledge proofs.", tech: ["Solidity", "Go", "ZK-SNARKs", "IPFS"] }
+        };
+
+        document.querySelectorAll('[data-modal]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const d = modalContent[btn.getAttribute('data-modal')];
+                document.getElementById('m-data').innerHTML = `
+                    <h2 class="text-8xl md:text-9xl font-black tracking-tighter mb-12 uppercase leading-none">${d.title}</h2>
+                    <p class="text-3xl text-gray-300 mb-16 max-w-3xl leading-relaxed">${d.body}</p>
+                    <div class="flex flex-wrap gap-4">${d.tech.map(t => `<span class="tech-pill mono" data-tech="${t}">${t}</span>`).join('')}</div>
+                `;
+                document.getElementById('modal-overlay').classList.remove('hidden');
+                gsap.to("#m-bg", { opacity: 1, duration: 0.6 });
+                gsap.to("#m-content", { opacity: 1, scale: 1, duration: 0.8, ease: "expo.out" });
+            });
+        });
+
+        document.getElementById('m-close').addEventListener('click', () => {
+            gsap.to("#m-content", { opacity: 0, scale: 0.95, duration: 0.4 });
+            gsap.to("#m-bg", { opacity: 0, duration: 0.4, onComplete: () => document.getElementById('modal-overlay').classList.add('hidden') });
+        });
+
+        document.getElementById('modal-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-overlay') {
+                gsap.to("#m-content", { opacity: 0, scale: 0.95, duration: 0.4 });
+                gsap.to("#m-bg", { opacity: 0, duration: 0.4, onComplete: () => document.getElementById('modal-overlay').classList.add('hidden') });
+            }
+        });
+
+        if (window.innerWidth <= 768) {
+            document.body.style.cursor = 'default';
+            c.style.display = 'none';
+            cf.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+
